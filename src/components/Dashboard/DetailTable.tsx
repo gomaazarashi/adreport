@@ -1,1 +1,133 @@
-export default function DetailTable() { return null; }
+'use client';
+
+import { useState } from 'react';
+import { PerformanceMetrics } from '@/lib/types';
+import { formatCurrency, formatPercentage } from '@/lib/metrics-calculator';
+import Card from '@/components/Ui/Card';
+
+interface DetailTableProps {
+  data: PerformanceMetrics[];
+}
+
+export default function DetailTable({ data }: DetailTableProps) {
+  const [sortKey, setSortKey] = useState<keyof PerformanceMetrics>('date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  if (!data || data.length === 0) {
+    return null;
+  }
+
+  // Sort data
+  const sortedData = [...data].sort((a, b) => {
+    const aValue = a[sortKey];
+    const bValue = b[sortKey];
+
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return sortDirection === 'asc'
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+
+    const aNum = typeof aValue === 'number' ? aValue : 0;
+    const bNum = typeof bValue === 'number' ? bValue : 0;
+
+    return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
+  });
+
+  const handleSort = (key: keyof PerformanceMetrics) => {
+    if (sortKey === key) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDirection('desc');
+    }
+  };
+
+  const SortIcon = ({ columnKey }: { columnKey: keyof PerformanceMetrics }) => {
+    if (sortKey !== columnKey) {
+      return <span className="text-gray-400 ml-1">⇅</span>;
+    }
+    return <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>;
+  };
+
+  return (
+    <Card>
+      <h2 className="text-lg font-bold mb-6">詳細データ</h2>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-100 border-b">
+            <tr>
+              <th
+                className="px-4 py-3 text-left font-semibold cursor-pointer hover:bg-gray-200"
+                onClick={() => handleSort('date')}
+              >
+                日付 <SortIcon columnKey="date" />
+              </th>
+              <th
+                className="px-4 py-3 text-right font-semibold cursor-pointer hover:bg-gray-200"
+                onClick={() => handleSort('impressions')}
+              >
+                インプレッション <SortIcon columnKey="impressions" />
+              </th>
+              <th
+                className="px-4 py-3 text-right font-semibold cursor-pointer hover:bg-gray-200"
+                onClick={() => handleSort('clicks')}
+              >
+                クリック <SortIcon columnKey="clicks" />
+              </th>
+              <th
+                className="px-4 py-3 text-right font-semibold cursor-pointer hover:bg-gray-200"
+                onClick={() => handleSort('cost')}
+              >
+                費用 <SortIcon columnKey="cost" />
+              </th>
+              <th
+                className="px-4 py-3 text-right font-semibold cursor-pointer hover:bg-gray-200"
+                onClick={() => handleSort('conversions')}
+              >
+                CV <SortIcon columnKey="conversions" />
+              </th>
+              <th className="px-4 py-3 text-right font-semibold">CTR</th>
+              <th className="px-4 py-3 text-right font-semibold">CVR</th>
+              <th className="px-4 py-3 text-right font-semibold">CPA</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedData.map((row, idx) => (
+              <tr
+                key={idx}
+                className="border-b hover:bg-gray-50 transition-colors"
+              >
+                <td className="px-4 py-3 text-gray-900">{row.date || '—'}</td>
+                <td className="px-4 py-3 text-right text-gray-700">
+                  {row.impressions.toLocaleString('ja-JP')}
+                </td>
+                <td className="px-4 py-3 text-right text-gray-700">
+                  {row.clicks.toLocaleString('ja-JP')}
+                </td>
+                <td className="px-4 py-3 text-right text-gray-700">
+                  {formatCurrency(row.cost)}
+                </td>
+                <td className="px-4 py-3 text-right text-gray-700">
+                  {row.conversions.toLocaleString('ja-JP')}
+                </td>
+                <td className="px-4 py-3 text-right text-gray-700">
+                  {formatPercentage(row.ctr)}
+                </td>
+                <td className="px-4 py-3 text-right text-gray-700">
+                  {formatPercentage(row.cvr)}
+                </td>
+                <td className="px-4 py-3 text-right text-gray-700">
+                  {formatCurrency(row.cpa)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="text-xs text-gray-500 mt-4 text-right">
+        全 {sortedData.length} 件を表示
+      </p>
+    </Card>
+  );
+}
