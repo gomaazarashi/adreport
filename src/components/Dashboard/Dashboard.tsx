@@ -104,7 +104,7 @@ export default function Dashboard() {
 
         {/* コントロールパネル */}
         <Card className="mb-8">
-          <h2 className="text-lg font-bold mb-6">フィルター設定</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-6">フィルター設定</h2>
 
           {/* アカウント選択 */}
           <div className="mb-6">
@@ -145,7 +145,7 @@ export default function Dashboard() {
           </>
         ) : (
           <Card>
-            <p className="text-center text-gray-500 py-8">
+            <p className="text-center text-gray-900 py-8">
               選択した期間にはデータがありません
             </p>
           </Card>

@@ -15,7 +15,7 @@ export default function PerformanceChart({ data }: PerformanceChartProps) {
 
   // Prepare chart data
   const chartData = data.map((m) => ({
-    date: m.date || '不明',
+    date: m.metric_date || '不明',
     cost: Math.round(m.cost),
     clicks: m.clicks,
     conversions: m.conversions,
@@ -25,7 +25,7 @@ export default function PerformanceChart({ data }: PerformanceChartProps) {
 
   return (
     <Card>
-      <h2 className="text-lg font-bold mb-6">パフォーマンス推移</h2>
+      <h2 className="text-lg font-bold text-gray-900 mb-6">パフォーマンス推移</h2>
       <div className="w-full h-80">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>

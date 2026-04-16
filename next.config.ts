@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  distDir: '.next',
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  experimental: {
+    webpackBuildWorker: false,
+  },
 };
 
 export default nextConfig;

@@ -45,14 +45,14 @@ export default function DetailTable({ data }: DetailTableProps) {
 
   const SortIcon = ({ columnKey }: { columnKey: keyof PerformanceMetrics }) => {
     if (sortKey !== columnKey) {
-      return <span className="text-gray-400 ml-1">⇅</span>;
+      return <span className="text-gray-700 ml-1">⇅</span>;
     }
     return <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>;
   };
 
   return (
     <Card>
-      <h2 className="text-lg font-bold mb-6">詳細データ</h2>
+      <h2 className="text-lg font-bold text-gray-900 mb-6">詳細データ</h2>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-100 border-b">
@@ -98,7 +98,7 @@ export default function DetailTable({ data }: DetailTableProps) {
                 key={idx}
                 className="border-b hover:bg-gray-50 transition-colors"
               >
-                <td className="px-4 py-3 text-gray-900">{row.date || '—'}</td>
+                <td className="px-4 py-3 text-gray-900">{row.metric_date || '—'}</td>
                 <td className="px-4 py-3 text-right text-gray-700">
                   {row.impressions.toLocaleString('ja-JP')}
                 </td>
@@ -125,7 +125,7 @@ export default function DetailTable({ data }: DetailTableProps) {
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-gray-500 mt-4 text-right">
+      <p className="text-xs text-gray-900 mt-4 text-right">
         全 {sortedData.length} 件を表示
       </p>
     </Card>

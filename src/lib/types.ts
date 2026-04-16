@@ -70,7 +70,7 @@ export type PerformanceMetrics = {
   ad_group_id?: string;
   ad_id?: string;
   asset_id?: string;
-  date: string;
+  metric_date: string;
   cost: number;
   impressions: number;
   clicks: number;
@@ -78,6 +78,11 @@ export type PerformanceMetrics = {
   cvr: number;
   conversions: number;
   cpa: number;
+  conversion_value?: number;
+  cpc?: number;
+  roas?: number;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type MetricsResponse = {
