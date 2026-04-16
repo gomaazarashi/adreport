@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic';
 import { calculateMetrics } from '@/lib/metrics-calculator';
 import { CSVImportResponse } from '@/lib/types';
 import Papa from 'papaparse';
