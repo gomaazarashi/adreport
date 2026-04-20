@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>グランピング LP - 株主向け食事付きプラン</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+      section {
+        padding: 80px 20px;
+        border-bottom: 1px solid #eee;
+      }
+      h1,
+      h2 {
+        margin-bottom: 20px;
+        font-size: 32px;
+      }
+      h2 {
+        font-size: 28px;
+        color: #2c3e50;
+      }
+      p {
+        margin-bottom: 15px;
+        font-size: 16px;
+        line-height: 1.8;
+      }
+      .image-placeholder {
+        background: #f0f0f0;
+        height: 300px;
+        margin: 30px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #999;
+      }
+
+      /* ファーストビュー */
+      #firstview {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0;
+      }
+      #firstview h1 {
+        font-size: 48px;
+        margin-bottom: 20px;
+      }
+      #firstview .subtitle {
+        font-size: 24px;
+        margin-bottom: 40px;
+      }
+
+      /* フローティングCTA */
+      .floating-cta {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        min-width: 280px;
+      }
+      .floating-cta p {
+        margin-bottom: 15px;
+        font-size: 14px;
+        font-weight: bold;
+        text-align: center;
+      }
+      .floating-cta .buttons {
+        display: flex;
+        gap: 10px;
+      }
+      .floating-cta a {
+        flex: 1;
+        padding: 12px;
+        border-radius: 6px;
+        text-align: center;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: bold;
+        transition: all 0.3s;
+      }
+      .btn-alps {
+        background: #8b4513;
+        color: white;
+      }
+      .btn-alps:hover {
+        background: #6b3410;
+      }
+      .btn-iseshima {
+        background: #1e90ff;
+        color: white;
+      }
+      .btn-iseshima:hover {
+        background: #1873cc;
+      }
+
+      /* 2カラムレイアウト */
+      .two-column {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin: 40px 0;
+      }
+      .column {
+        padding: 30px;
+        background: #f9f9f9;
+        border-radius: 8px;
+      }
+      .column h3 {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: #2c3e50;
+      }
+
+      /* お客様の声 */
+      .testimonial-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        margin: 40px 0;
+      }
+      .testimonial {
+        background: #f9f9f9;
+        padding: 30px;
+        border-radius: 8px;
+        text-align: center;
+      }
+      .testimonial-image {
+        width: 80px;
+        height: 80px;
+        background: #ddd;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+      }
+      .testimonial h4 {
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+      .testimonial p {
+        font-size: 14px;
+        color: #666;
+      }
+
+      /* FAQ */
+      .faq-item {
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 20px;
+        background: #f9f9f9;
+      }
+      .faq-question {
+        font-weight: bold;
+        font-size: 16px;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        cursor: pointer;
+      }
+      .faq-answer {
+        font-size: 14px;
+        color: #666;
+        display: none;
+      }
+      .faq-answer.active {
+        display: block;
+      }
+
+      /* モバイル対応 */
+      @media (max-width: 768px) {
+        section {
+          padding: 40px 20px;
+        }
+        h1,
+        h2 {
+          font-size: 24px;
+        }
+        .two-column {
+          grid-template-columns: 1fr;
+        }
+        .testimonial-container {
+          grid-template-columns: 1fr;
+        }
+        .floating-cta {
+          bottom: 20px;
+          right: 20px;
+          left: 20px;
+          min-width: unset;
+        }
+        #firstview h1 {
+          font-size: 32px;
+        }
+        #firstview .subtitle {
+          font-size: 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- フローティングCTA -->
+    <div class="floating-cta">
+      <p>どちらに予約しますか？</p>
+      <div class="buttons">
+        <a
+          href="https://d-reserve.jp/GSEA002F01400/GSEA002A01?hotelCode=0000001885&pl=PL00050557"
+          class="btn-alps"
+          >アルプスBASE</a
+        >
+        <a
+          href="https://d-reserve.jp/GSEA002F01400/GSEA002A01?hotelCode=0000001885&pl=PL00046072"
+          class="btn-iseshima"
+          >伊勢志摩BASE</a
+        >
+      </div>
+    </div>
+
+    <!-- セクション1：ファーストビュー -->
+    <section id="firstview">
+      <div class="container">
+        <h1>非日常な時間を、家族や仲間と。</h1>
+        <p class="subtitle">自然と楽しむ、上質なグランピング体験。</p>
+        <div class="image-placeholder">
+          [ファーストビュー画像 - グランピングの非日常シーン]
+        </div>
+      </div>
+    </section>
+
+    <!-- セクション2：グランピング体験の本質 -->
+    <section id="section2">
+      <div class="container">
+        <h2>グランピング体験とは</h2>
+        <p>
+          グランピングは、キャンプの自由さと、ホテルの快適さを兼ね備えた体験です。冷暖房完備のドームテント、整備されたアメニティ、そして何より——到着した瞬間から、すべてが整った環境があります。
+        </p>
+        <p>
+          ここでの時間は、自然の中にいながら、準備や片付けといった煩雑さから解放される時間。家族との会話が増え、友人との笑顔が増え、一緒にいる時間の質が変わります。それが、グランピングの本当の価値です。
+        </p>
+        <div class="image-placeholder">
+          [テント内の快適さ、家族がくつろぐシーン]
+        </div>
+      </div>
+    </section>
+
+    <!-- セクション3：グランピングの本来の楽しみ方 -->
+    <section id="section3">
+      <div class="container">
+        <h2>グランピングの本来の楽しみ方</h2>
+        <p>
+          グランピングは、自然の中での快適さと、充実した時間を両立させる体験です。
+        </p>
+        <p>
+          基本は、食事付きプラン。なぜなら、グランピングの本来の価値は、準備や片付けといった手間から解放された上で、自然を感じ、家族や仲間と過ごす時間だからです。
+        </p>
+        <p>
+          素泊まりを選ぶことも可能ですが、その場合は「食事をどこで、どう調達するか」といった判断と準備が発生します。結果として、自然を楽しむ時間が分散され、本来の充実感が減ってしまう可能性があります。
+        </p>
+        <p>
+          株主様が利用できるのは、食事付きプランの特別な料金体系。つまり、グランピングの本来の価値を、最もお得に体験できる選択肢です。
+        </p>
+        <div class="image-placeholder">
+          [食事準備がない状態で、みんなでリラックスしている風景]
+        </div>
+      </div>
+    </section>
+
+    <!-- セクション4：食事付きプランが提供する体験 -->
+    <section id="section4">
+      <div class="container">
+        <h2>食事付きだから、自然と楽しめる</h2>
+        <p>
+          チェックイン後、すぐに自然と向き合う時間が始まります。準備や片付けの手間がないため、焚き火を囲む時間、夜空を眺める時間、朝日の中での目覚めといった一つひとつの瞬間に、集中できます。
+        </p>
+        <p>
+          夕食は、地元の食材を使った上質なBBQ。調理の過程を見守りながら、自然の中で食事をする。朝食は、爽やかな朝日の中で。お子さんにはキッズメニュー、大人にはプレミアムメニューと、すべての世代が同じ体験をシェアできます。
+        </p>
+        <p>
+          小さなお子さんや両親を連れている場合、特にこのメリットが活きます。素泊まりなら、食事の準備と後片付けが負担になり、家族全員でリラックスすることが難しくなります。しかし食事付きなら、その手間から完全に解放されるため、みんなが同じペースで自然を楽しめます。
+        </p>
+        <p>
+          アクティビティも、食事付きだからこそ実現します。山でのSUPやニジマス釣り、海でのシーカヤック。帰ってきた後は、調理の心配なく、ゆっくりと食事と会話を楽しむ。この流れが、グランピングの本来の充実感です。
+        </p>
+        <div class="image-placeholder">
+          [子どもやお年寄りが一緒に食事や活動を楽しむシーン]
+        </div>
+      </div>
+    </section>
+
+    <!-- セクション5：両施設の個性 -->
+    <section id="section5">
+      <div class="container">
+        <h2>山か海か。選ぶ体験の色</h2>
+
+        <div class="two-column">
+          <div class="column">
+            <h3>アルプスベース（長野・山の環境）</h3>
+            <p>
+              中央アルプス・南アルプスを望む飯島町に位置するアルプスベースは、山々に囲まれた環境で、星空が美しいことで知られています。
+            </p>
+            <p>
+              夜は満天の星を眺めながら、焚き火を囲む。朝は木漏れ日の中で目覚める。食事は信州の恵みを活かしたもの——信州プレミアム牛、敷地内の釣り堀で育ったニジマスの塩焼き、季節の野菜を使ったオリジナルBBQ。
+            </p>
+            <p>
+              さらに、いちご狩り、さくらんぼ狩り、SUP体験、テントサウナなど、季節ごとのアクティビティが充実。子どもから大人まで、家族全員で自然を感じられます。
+            </p>
+            <div class="image-placeholder">
+              [星空、山々、焚き火、山の季節感]
+            </div>
+          </div>
+
+          <div class="column">
+            <h3>伊勢志摩ベース（三重・海の環境）</h3>
+            <p>
+              伊勢志摩国立公園に位置する伊勢志摩ベースは、英虞湾を望むプライベートな環境。温暖な気候と、海からの新鮮な恵みが特徴です。
+            </p>
+            <p>
+              テラスからは海が見え、リゾート地として知られる伊勢志摩の上質な雰囲気が漂います。食事は三重ブランドの食材——松阪牛、英虞湾で獲れた海の幸を使った、お洒落なスキレット料理やスープ。FREE
+              BAR完備で、くつろぎながらドリンクも楽しめます。
+            </p>
+            <p>
+              シーカヤック、ダイビング、藍染体験など、海でのアクティビティが充実。大人の非日常を求める利用者からも人気です。
+            </p>
+            <div class="image-placeholder">
+              [海、英虞湾、リゾート感、海のアクティビティ]
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- セクション6：食事紹介 -->
+    <section id="section6">
+      <div class="container">
+        <h2>地元の恵みを、グランピングで。</h2>
+        <p>
+          両施設の食事は、単なる「食べもの」ではありません。その土地の季節、自然、文化が詰まった、その場所でしか味わえない体験です。
+        </p>
+        <p>
+          スタンダードBBQ、プレミアムBBQ、朝食——メニューは季節ごとに変わり、その時の旬を活かしたものになります。お子さん向けのキッズメニューも用意されているため、家族全員が同じ食体験をシェアできます。
+        </p>
+        <p>
+          調理はスタッフが担当。あなたたちは、焚き火を囲みながら、会話を楽しみながら、ゆっくりと食事を味わうだけ。この「時間の使い方の自由さ」が、グランピングの食事の本当の価値です。
+        </p>
+
+        <div class="image-placeholder">
+          [焚き火を囲む夜食シーン（両施設の雰囲気）]
+        </div>
+        <div class="image-placeholder">[朝日の中での朝食シーン]</div>
+        <div class="image-placeholder">[家族・仲間と食べている表情]</div>
+        <div class="image-placeholder">[調理風景（地元食材の調理過程）]</div>
+        <div class="image-placeholder">
+          [地元食材アップ（信州プレミアム牛、松阪牛、野菜など）]
+        </div>
+
+        <p>
+          <a href="https://gp-plaza.com/alps-base/food/" target="_blank"
+            >詳しいメニューはこちら</a
+          >
+        </p>
+      </div>
+    </section>
+
+    <!-- セクション7：株主向けの優越感 -->
+    <section id="section7">
+      <div class="container">
+        <h2>株主だからこそ、選べるプラン。</h2>
+        <p>
+          このプランは、一般には公開されていません。プラザホールディングスの株主様だけが、アクセスできる特別な選択肢です。
+        </p>
+        <p>
+          一般のお客様は素泊まりか、既存プランの中から選んでいます。一方、あなたは——最高の環境で、最も充実した食事体験ができるプランを、特別な料金で利用できる立場にあります。
+        </p>
+        <p>それは、株主という立場がもたらす、限定的な価値です。</p>
+        <div class="image-placeholder">
+          [プレミアムな雰囲気を表現するビジュアル]
+        </div>
+      </div>
+    </section>
+
+    <!-- セクション8：お客様の声 -->
+    <section id="section8">
+      <div class="container">
+        <h2>実際にご利用された方の声</h2>
+
+        <div class="testimonial-container">
+          <div class="testimonial">
+            <div class="testimonial-image"></div>
+            <h4>子連れパターン</h4>
+            <p>
+              「小さな子どもを連れての家族旅行は何かと大変ですが、食事が用意されているおかげで本当にリラックスできました。調理の手間がないので、子どもとの時間に集中できます。」
+            </p>
+            <p style="font-size: 12px; color: #999; margin-top: 15px">
+              社員 / 30代
+            </p>
+          </div>
+
+          <div class="testimonial">
+            <div class="testimonial-image"></div>
+            <h4>両親と同伴パターン</h4>
+            <p>
+              「両親を連れてきましたが、食事が完備されているので、親たちも無理なく楽しめました。自分たちも親の世話を焼くことなく、三世代で自然を楽しむ時間が作れました。」
+            </p>
+            <p style="font-size: 12px; color: #999; margin-top: 15px">
+              社員 / 40代
+            </p>
+          </div>
+
+          <div class="testimonial">
+            <div class="testimonial-image"></div>
+            <h4>仲間との利用パターン</h4>
+            <p>
+              「友人たちとの非日常を満喫できました。食事の準備に時間を取られることなく、話題や笑顔が増えて、本当に充実した時間でした。」
+            </p>
+            <p style="font-size: 12px; color: #999; margin-top: 15px">
+              社員 / 50代
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- セクション9：FAQ -->
+    <section id="section9">
+      <div class="container">
+        <h2>よくあるご質問</h2>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFAQ(this)">
+            Q. 小さなお子さんがいても快適に過ごせますか？
+          </div>
+          <div class="faq-answer">
+            A.
+            もちろんです。テント内は冷暖房完備で、快適な温度管理が可能です。シャワーやトイレも敷地内に完備されており、小さなお子さんの急な対応にも対応しやすい環境です。キッズメニューもご用意していますので、お子さんと一緒に食事も楽しめます。ただし、離乳食はご用意がないため、温めが必要な場合はお声がけください。定員内であれば人数変更も可能です。
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFAQ(this)">
+            Q. お年寄りを連れて行っても大丈夫ですか？
+          </div>
+          <div class="faq-answer">
+            A.
+            テント内にはエアコンと空気清浄機が完備されており、快適にお過ごしいただけます。各テントには懐中電灯やランタンも用意されているため、夜間の移動も安心です。ただし、テント内には浴槽がなくシャワーのみとなります。近隣には温泉施設もございますので、ご希望に応じてご案内させていただきます。
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFAQ(this)">
+            Q. チェックイン・アウトの時間は？
+          </div>
+          <div class="faq-answer">
+            A.
+            チェックインは15時～18時、チェックアウトは8時～10時（伊勢志摩は翌10時）までです。到着が18時以降になる場合は、事前にご連絡ください。
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFAQ(this)">
+            Q. 食事はアレルギー対応していますか？
+          </div>
+          <div class="faq-answer">
+            A.
+            申し訳ございませんが、ハラル・アレルギー対応はしておりません。アレルギーがある場合は、お客様ご自身で食材をお持ちください。
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFAQ(this)">
+            Q. 食事の注文は何日前までですか？
+          </div>
+          <div class="faq-answer">
+            A.
+            宿泊予約時に予約サイトからのご注文となります。変更は基本的に宿泊日7日前18時までとなります。それ以降にご希望の場合はお電話にてご相談ください。
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFAQ(this)">
+            Q. 食事は温かく提供されますか？
+          </div>
+          <div class="faq-answer">
+            A.
+            はい。BBQは夕食時間（18時～21時）に調理提供され、朝食も温かい状態でお出しします。両施設ともに食事スペースが完備されており、快適にお召し上がりいただけます。
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFAQ(this)">
+            Q. グランピング初心者ですが、何を持ってくればいいですか？
+          </div>
+          <div class="faq-answer">
+            A.
+            テント内には、バスタオル、アメニティ類（シャンプー、ボディソープ、歯ブラシなど）、エアコン、ドライヤーなど、必要なものが一通り揃っています。ご自身の着替えと洗面用具があれば基本的には大丈夫です。冬季（12月～3月）にご来館の場合は、スタッドレスタイヤでのご来館をお勧めしております。
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFAQ(this)">
+            Q. 雨の場合、BBQはできますか？
+          </div>
+          <div class="faq-answer">
+            A.
+            はい、可能です。アルプスベースは屋根・風よけ付きのBBQスペースをご用意。伊勢志摩ベースは建物型の食事スペースを完備しており、全天候型でお楽しみいただけます。
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFAQ(this)">
+            Q. Wi-Fiやコンセントはありますか？
+          </div>
+          <div class="faq-answer">
+            A.
+            はい、どちらも完備されています。テント内にはコンセントが複数ございます。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      function toggleFAQ(element) {
+        const answer = element.nextElementSibling;
+        answer.classList.toggle('active');
+      }
+    </script>
+  </body>
+</html>

@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     webpackBuildWorker: false,
+    turbopackFileSystemCacheForDev: false,
   },
 };
 

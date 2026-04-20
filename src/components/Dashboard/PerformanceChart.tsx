@@ -1,7 +1,16 @@
 'use client';
 
 import { PerformanceMetrics } from '@/lib/types';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 import Card from '@/components/Ui/Card';
 
 interface PerformanceChartProps {
@@ -30,16 +39,8 @@ export default function PerformanceChart({ data }: PerformanceChartProps) {
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis
-              dataKey="date"
-              stroke="#999"
-              style={{ fontSize: '12px' }}
-            />
-            <YAxis
-              stroke="#999"
-              style={{ fontSize: '12px' }}
-              yAxisId="left"
-            />
+            <XAxis dataKey="date" stroke="#999" style={{ fontSize: '12px' }} />
+            <YAxis stroke="#999" style={{ fontSize: '12px' }} yAxisId="left" />
             <YAxis
               stroke="#999"
               style={{ fontSize: '12px' }}
