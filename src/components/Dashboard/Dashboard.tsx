@@ -19,11 +19,11 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
 
   const { accounts, loading: accountsLoading, error: accountsError } = useAccounts();
-  const { data: metricsData, loading: metricsLoading, error: metricsError } = useMetricsData(
-    selectedAccountId,
+  const { data: metricsData, loading: metricsLoading, error: metricsError } = useMetricsData({
+    accountId: selectedAccountId,
     startDate,
-    endDate
-  );
+    endDate,
+  });
 
   // Set first account as default
   useEffect(() => {
