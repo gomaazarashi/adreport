@@ -5,10 +5,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  experimental: {
-    webpackBuildWorker: false,
-    turbopackFileSystemCacheForDev: false,
-  },
+  turbopack: {},
 };
 
 export default nextConfig;

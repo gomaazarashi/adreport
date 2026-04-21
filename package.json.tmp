@@ -1,0 +1,10 @@
+{
+  "name": "adreport",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --no-turbopack",
+    "build": "next build --no-turbopack",
+    "start": "next start",
+    "lint": "eslint"
+  },
