@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useAccounts } from '@/hooks/useAccounts';
 import { useMetricsData } from '@/hooks/useMetricsData';
+import { useMasterData } from '@/hooks/useMasterData';
 import AccountSelector from './AccountSelector';
 import DateRangePicker from './DateRangePicker';
+import FilterPanel, { type FilterValues } from './FilterPanel';
 import MetricsCards from './MetricsCards';
 import PerformanceChart from './PerformanceChart';
 import DetailTable from './DetailTable';
@@ -14,6 +16,7 @@ import Card from '@/components/Ui/Card';
 
 export default function Dashboard() {
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
+  const [selectedFilters, setSelectedFilters] = useState<FilterValues>({});
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +26,19 @@ export default function Dashboard() {
     accountId: selectedAccountId,
     startDate,
     endDate,
+    campaignIds: selectedFilters.campaignIds,
+    adGroupIds: selectedFilters.adGroupIds,
+    adIds: selectedFilters.adIds,
+    assetIds: selectedFilters.assetIds,
   });
+  const {
+    campaigns,
+    adGroups,
+    ads,
+    assets,
+    loading: masterDataLoading,
+    error: masterDataError,
+  } = useMasterData(selectedAccountId);
 
   // Set first account as default
   useEffect(() => {
@@ -31,6 +46,13 @@ export default function Dashboard() {
       setSelectedAccountId(accounts[0].account_id);
     }
   }, [accounts, selectedAccountId]);
+
+  // Reset filters whenever the account changes — campaigns/ad_groups/ads/assets
+  // from one account never apply to another, so carrying selections across
+  // would silently filter the new account's metrics down to nothing.
+  useEffect(() => {
+    setSelectedFilters({});
+  }, [selectedAccountId]);
 
   // Set default date range (last 7 days)
   useEffect(() => {
@@ -47,12 +69,14 @@ export default function Dashboard() {
   useEffect(() => {
     if (accountsError) {
       setError(`アカウント読み込みエラー: ${accountsError}`);
+    } else if (masterDataError) {
+      setError(`マスターデータ読み込みエラー: ${masterDataError}`);
     } else if (metricsError) {
       setError(`メトリクス読み込みエラー: ${metricsError}`);
     } else {
       setError(null);
     }
-  }, [accountsError, metricsError]);
+  }, [accountsError, masterDataError, metricsError]);
 
   const handleAccountSelect = (accountId: string) => {
     setSelectedAccountId(accountId);
@@ -121,6 +145,19 @@ export default function Dashboard() {
             initialStartDate={startDate}
             initialEndDate={endDate}
           />
+
+          {/* マスターデータフィルター */}
+          <div className="mt-6">
+            <FilterPanel
+              campaigns={campaigns}
+              adGroups={adGroups}
+              ads={ads}
+              assets={assets}
+              selectedFilters={selectedFilters}
+              onFilterChange={setSelectedFilters}
+              loading={masterDataLoading}
+            />
+          </div>
         </Card>
 
         {/* メトリクス表示 */}

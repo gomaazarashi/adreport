@@ -18,10 +18,10 @@ export type AggregationLevel =
   | 'asset';
 
 export type MetricsFilters = {
-  campaignId?: string;
-  adGroupId?: string;
-  adId?: string;
-  assetId?: string;
+  campaignIds?: string[];
+  adGroupIds?: string[];
+  adIds?: string[];
+  assetIds?: string[];
 };
 
 type DerivedBase = {
@@ -71,21 +71,42 @@ export function calculateDerivedMetrics(base: DerivedBase): DerivedResult {
 }
 
 /**
- * Apply equality filters on optional FK fields. Undefined filters are ignored.
- * Rows whose value for a provided filter key is missing are excluded.
+ * Apply set-membership (IN) filters on optional FK fields. A filter array
+ * that is undefined or empty is treated as "no filter" for that field.
+ * Rows whose value for an active filter key is missing are excluded —
+ * matches the prior single-ID behavior so a filter never silently includes
+ * rows lacking the FK it filters on.
  */
 export function filterMetrics(
   data: PerformanceMetrics[],
   filters: MetricsFilters
 ): PerformanceMetrics[] {
-  const { campaignId, adGroupId, adId, assetId } = filters;
-  if (!campaignId && !adGroupId && !adId && !assetId) return data;
+  const { campaignIds, adGroupIds, adIds, assetIds } = filters;
+
+  const hasCampaignFilter = !!campaignIds && campaignIds.length > 0;
+  const hasAdGroupFilter = !!adGroupIds && adGroupIds.length > 0;
+  const hasAdFilter = !!adIds && adIds.length > 0;
+  const hasAssetFilter = !!assetIds && assetIds.length > 0;
+
+  if (!hasCampaignFilter && !hasAdGroupFilter && !hasAdFilter && !hasAssetFilter) {
+    return data;
+  }
 
   return data.filter((row) => {
-    if (campaignId && row.campaign_id !== campaignId) return false;
-    if (adGroupId && row.ad_group_id !== adGroupId) return false;
-    if (adId && row.ad_id !== adId) return false;
-    if (assetId && row.asset_id !== assetId) return false;
+    if (
+      hasCampaignFilter &&
+      (!row.campaign_id || !campaignIds!.includes(row.campaign_id))
+    )
+      return false;
+    if (
+      hasAdGroupFilter &&
+      (!row.ad_group_id || !adGroupIds!.includes(row.ad_group_id))
+    )
+      return false;
+    if (hasAdFilter && (!row.ad_id || !adIds!.includes(row.ad_id)))
+      return false;
+    if (hasAssetFilter && (!row.asset_id || !assetIds!.includes(row.asset_id)))
+      return false;
     return true;
   });
 }

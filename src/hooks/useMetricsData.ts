@@ -49,10 +49,10 @@ export function useMetricsData(
     endDate,
     aggregationLevel = 'account',
     preserveDate = true,
-    campaignId,
-    adGroupId,
-    adId,
-    assetId,
+    campaignIds,
+    adGroupIds,
+    adIds,
+    assetIds,
   } = options;
 
   const [rawData, setRawData] = useState<PerformanceMetrics[]>([]);
@@ -113,20 +113,20 @@ export function useMetricsData(
   // don't recompute when only unrelated state changes.
   const data = useMemo(() => {
     const filtered = filterMetrics(rawData, {
-      campaignId,
-      adGroupId,
-      adId,
-      assetId,
+      campaignIds,
+      adGroupIds,
+      adIds,
+      assetIds,
     });
     return aggregateMetrics(filtered, aggregationLevel, preserveDate);
   }, [
     rawData,
     aggregationLevel,
     preserveDate,
-    campaignId,
-    adGroupId,
-    adId,
-    assetId,
+    campaignIds,
+    adGroupIds,
+    adIds,
+    assetIds,
   ]);
 
   return { data, loading, error, period };
