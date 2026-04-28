@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { filterMetrics, aggregateMetrics, type MetricsFilters } from '@/lib/metricsAggregation';
+import { aggregateMetrics } from '@/lib/metricsAggregation';
 
 export type UseMetricsDataOptions = {
   accountId: string;
@@ -86,23 +86,11 @@ export function useMetricsData(options: UseMetricsDataOptions) {
     return () => abort.abort();
   }, [accountId, startDate, endDate, campaignIds, adGroupIds, adIds, assetIds]);
 
+  // APIからすでにフィルタリングされたデータが来ているので、
+  // クライアント側ではfilterMetrics()を呼ばず、aggregateMetricsのみ実行
   const data = useMemo(() => {
-    const filtered = filterMetrics(rawData, {
-      campaignIds,
-      adGroupIds,
-      adIds,
-      assetIds,
-    });
-    return aggregateMetrics(filtered, aggregationLevel, preserveDate);
-  }, [
-    rawData,
-    aggregationLevel,
-    preserveDate,
-    campaignIds,
-    adGroupIds,
-    adIds,
-    assetIds,
-  ]);
+    return aggregateMetrics(rawData, aggregationLevel, preserveDate);
+  }, [rawData, aggregationLevel, preserveDate]);
 
   return { data, loading, error, period };
 }
