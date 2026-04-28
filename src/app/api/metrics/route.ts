@@ -21,8 +21,11 @@ export async function GET(request: NextRequest) {
     const accountId = searchParams.get('account_id');
     const startDate = searchParams.get('start_date');
     const endDate = searchParams.get('end_date');
-    const campaignId = searchParams.get('campaign_id');
-    const adGroupId = searchParams.get('ad_group_id');
+    const campaignIds = searchParams.get('campaign_ids');
+const adGroupIds = searchParams.get('ad_group_ids');
+const adIds = searchParams.get('ad_ids');
+const assetIds = searchParams.get('asset_ids');
+
     const level = searchParams.get('level') || 'account';
 
     // Validate required parameter
@@ -128,9 +131,26 @@ export async function GET(request: NextRequest) {
     }
 
     // Apply optional filters based on level
-    if (level === 'campaign' && campaignId) {
-      query = query.eq('campaign_id', campaignId);
-    }
+    if (campaignIds) {
+  const ids = campaignIds.split(',');
+  query = query.in('campaign_id', ids);
+}
+
+if (adGroupIds) {
+  const ids = adGroupIds.split(',');
+  query = query.in('ad_group_id', ids);
+}
+
+if (adIds) {
+  const ids = adIds.split(',');
+  query = query.in('ad_id', ids);
+}
+
+if (assetIds) {
+  const ids = assetIds.split(',');
+  query = query.in('asset_id', ids);
+}
+
 
     if (level === 'ad_group' && adGroupId) {
       query = query.eq('ad_group_id', adGroupId);
