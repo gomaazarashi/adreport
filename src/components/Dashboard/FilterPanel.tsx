@@ -19,7 +19,6 @@ interface FilterPanelProps {
   assets: Asset[];
   selectedFilters: FilterValues;
   onFilterChange: (filters: FilterValues) => void;
-  /** When true, render a loading state instead of the filter sections. */
   loading?: boolean;
 }
 
@@ -39,8 +38,6 @@ const EMPTY_MESSAGES: Record<SectionKey, string> = {
   asset: 'アセットがありません',
 };
 
-const EMPTY_ARRAY: string[] = [];
-
 export default function FilterPanel({
   campaigns,
   adGroups,
@@ -57,158 +54,91 @@ export default function FilterPanel({
     asset: false,
   });
 
-  const selectedCampaignIds = selectedFilters.campaignIds ?? EMPTY_ARRAY;
-  const selectedAdGroupIds = selectedFilters.adGroupIds ?? EMPTY_ARRAY;
-  const selectedAdIds = selectedFilters.adIds ?? EMPTY_ARRAY;
-  const selectedAssetIds = selectedFilters.assetIds ?? EMPTY_ARRAY;
+  // ローカル state: チェック状態を管理
+  const [localCampaignIds, setLocalCampaignIds] = useState<string[]>(
+    selectedFilters.campaignIds || []
+  );
+  const [localAdGroupIds, setLocalAdGroupIds] = useState<string[]>(
+    selectedFilters.adGroupIds || []
+  );
+  const [localAdIds, setLocalAdIds] = useState<string[]>(
+    selectedFilters.adIds || []
+  );
+  const [localAssetIds, setLocalAssetIds] = useState<string[]>(
+    selectedFilters.assetIds || []
+  );
 
-  // Visible ad groups: when no campaign is selected, show all; otherwise
-  // narrow to ad groups whose campaign_id is in the selected campaign set.
+  // 親フィルタに基づいて表示範囲を制限
   const visibleAdGroups = useMemo(() => {
-    if (selectedCampaignIds.length === 0) return adGroups;
-    const allowed = new Set(selectedCampaignIds);
+    if (localCampaignIds.length === 0) return adGroups;
+    const allowed = new Set(localCampaignIds);
     return adGroups.filter((ag) => allowed.has(ag.campaign_id));
-  }, [adGroups, selectedCampaignIds]);
+  }, [adGroups, localCampaignIds]);
 
-  // Visible ads: parent constraint is the selected ad groups if any, otherwise
-  // the visible ad groups (which themselves reflect any campaign filter).
-  // Assets have no parent and are always all-visible.
   const visibleAds = useMemo(() => {
     const constraint =
-      selectedAdGroupIds.length > 0
-        ? new Set(selectedAdGroupIds)
+      localAdGroupIds.length > 0
+        ? new Set(localAdGroupIds)
         : new Set(visibleAdGroups.map((ag) => ag.ad_group_id));
     return ads.filter((a) => constraint.has(a.ad_group_id));
-  }, [ads, visibleAdGroups, selectedAdGroupIds]);
+  }, [ads, visibleAdGroups, localAdGroupIds]);
 
-  /**
-   * Apply transitive pruning before emitting upstream. Diff-based: we only
-   * cascade-drop children of parents that were *just* deselected in `next`
-   * (compared to the current `selectedFilters`). Adding a parent never
-   * prunes children. Cascade flows campaign → ad group → ad.
-   *
-   * Why diff instead of "filter children to currently selected parents":
-   * we want clearing a parent level (which deselects everything in one
-   * action) to drop the matching children, but we also want the user to be
-   * able to pre-select an ad group before any campaign is chosen without
-   * having that selection silently dropped on the next render.
-   */
-  const emit = (next: FilterValues) => {
-    const nextCampaignIds = next.campaignIds ?? EMPTY_ARRAY;
-    const nextAdGroupIdsInput = next.adGroupIds ?? EMPTY_ARRAY;
-    const nextAdIdsInput = next.adIds ?? EMPTY_ARRAY;
-
-    // Cascade 1: campaigns just deselected → drop their ad groups
-    const nextCampaignSet = new Set(nextCampaignIds);
-    const removedCampaignIds = selectedCampaignIds.filter(
-      (id) => !nextCampaignSet.has(id)
-    );
-
-    let prunedAdGroupIds = nextAdGroupIdsInput;
-    if (removedCampaignIds.length > 0) {
-      const removedCampaignSet = new Set(removedCampaignIds);
-      const adGroupsToDrop = new Set(
-        adGroups
-          .filter((ag) => removedCampaignSet.has(ag.campaign_id))
-          .map((ag) => ag.ad_group_id)
-      );
-      prunedAdGroupIds = prunedAdGroupIds.filter(
-        (id) => !adGroupsToDrop.has(id)
-      );
-    }
-
-    // Cascade 2: ad groups just deselected (either by user or by cascade
-    // above) → drop their ads
-    const prunedAdGroupSet = new Set(prunedAdGroupIds);
-    const removedAdGroupIds = selectedAdGroupIds.filter(
-      (id) => !prunedAdGroupSet.has(id)
-    );
-
-    let prunedAdIds = nextAdIdsInput;
-    if (removedAdGroupIds.length > 0) {
-      const removedAdGroupSet = new Set(removedAdGroupIds);
-      const adsToDrop = new Set(
-        ads
-          .filter((a) => removedAdGroupSet.has(a.ad_group_id))
-          .map((a) => a.ad_id)
-      );
-      prunedAdIds = prunedAdIds.filter((id) => !adsToDrop.has(id));
-    }
-
+  // チェックボックス変更時：ローカル state を更新して親に通知
+  const handleToggleCampaign = (id: string) => {
+    const next = localCampaignIds.includes(id)
+      ? localCampaignIds.filter((x) => x !== id)
+      : [...localCampaignIds, id];
+    setLocalCampaignIds(next);
     onFilterChange({
-  campaignIds: nextCampaignIds,
-  adGroupIds: prunedAdGroupIds,
-  adIds: prunedAdIds,
-  assetIds: next.assetIds ?? EMPTY_ARRAY,
-});
+      campaignIds: next,
+      adGroupIds: localAdGroupIds,
+      adIds: localAdIds,
+      assetIds: localAssetIds,
+    });
+  };
 
-console.log('FilterPanel.emit called with:', {
-  campaignIds: nextCampaignIds,
-  adGroupIds: prunedAdGroupIds,
-  adIds: prunedAdIds,
-  assetIds: next.assetIds ?? EMPTY_ARRAY,
-});
+  const handleToggleAdGroup = (id: string) => {
+    const next = localAdGroupIds.includes(id)
+      ? localAdGroupIds.filter((x) => x !== id)
+      : [...localAdGroupIds, id];
+    setLocalAdGroupIds(next);
+    onFilterChange({
+      campaignIds: localCampaignIds,
+      adGroupIds: next,
+      adIds: localAdIds,
+      assetIds: localAssetIds,
+    });
+  };
 
+  const handleToggleAd = (id: string) => {
+    const next = localAdIds.includes(id)
+      ? localAdIds.filter((x) => x !== id)
+      : [...localAdIds, id];
+    setLocalAdIds(next);
+    onFilterChange({
+      campaignIds: localCampaignIds,
+      adGroupIds: localAdGroupIds,
+      adIds: next,
+      assetIds: localAssetIds,
+    });
+  };
+
+  const handleToggleAsset = (id: string) => {
+    const next = localAssetIds.includes(id)
+      ? localAssetIds.filter((x) => x !== id)
+      : [...localAssetIds, id];
+    setLocalAssetIds(next);
+    onFilterChange({
+      campaignIds: localCampaignIds,
+      adGroupIds: localAdGroupIds,
+      adIds: localAdIds,
+      assetIds: next,
+    });
   };
 
   const toggleSection = (key: SectionKey) => {
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
   };
-
-  // Per-section toggle helpers. Each builds the next filter object and runs
-  // it through `emit` so transitive pruning is applied uniformly.
-  const toggleCampaign = (id: string) => {
-    const next = selectedCampaignIds.includes(id)
-      ? selectedCampaignIds.filter((x) => x !== id)
-      : [...selectedCampaignIds, id];
-    emit({ ...selectedFilters, campaignIds: next });
-  };
-  const toggleAdGroup = (id: string) => {
-    const next = selectedAdGroupIds.includes(id)
-      ? selectedAdGroupIds.filter((x) => x !== id)
-      : [...selectedAdGroupIds, id];
-    emit({ ...selectedFilters, adGroupIds: next });
-  };
-  const toggleAd = (id: string) => {
-    const next = selectedAdIds.includes(id)
-      ? selectedAdIds.filter((x) => x !== id)
-      : [...selectedAdIds, id];
-    emit({ ...selectedFilters, adIds: next });
-  };
-  const toggleAsset = (id: string) => {
-    const next = selectedAssetIds.includes(id)
-      ? selectedAssetIds.filter((x) => x !== id)
-      : [...selectedAssetIds, id];
-    emit({ ...selectedFilters, assetIds: next });
-  };
-
-  // Select-all targets the visible items only — selecting "all" within a
-  // narrowed parent should not silently widen the selection beyond what the
-  // user can see.
-  const selectAllCampaigns = () =>
-    emit({
-      ...selectedFilters,
-      campaignIds: campaigns.map((c) => c.campaign_id),
-    });
-  const clearCampaigns = () =>
-    emit({ ...selectedFilters, campaignIds: EMPTY_ARRAY });
-
-  const selectAllAdGroups = () =>
-    emit({
-      ...selectedFilters,
-      adGroupIds: visibleAdGroups.map((ag) => ag.ad_group_id),
-    });
-  const clearAdGroups = () =>
-    emit({ ...selectedFilters, adGroupIds: EMPTY_ARRAY });
-
-  const selectAllAds = () =>
-    emit({ ...selectedFilters, adIds: visibleAds.map((a) => a.ad_id) });
-  const clearAds = () => emit({ ...selectedFilters, adIds: EMPTY_ARRAY });
-
-  const selectAllAssets = () =>
-    emit({ ...selectedFilters, assetIds: assets.map((a) => a.asset_id) });
-  const clearAssets = () =>
-    emit({ ...selectedFilters, assetIds: EMPTY_ARRAY });
 
   if (loading) {
     return (
@@ -227,10 +157,8 @@ console.log('FilterPanel.emit called with:', {
           items={campaigns}
           idOf={(c) => c.campaign_id}
           labelOf={(c) => c.campaign_name}
-          selectedIds={selectedCampaignIds}
-          onToggle={toggleCampaign}
-          onSelectAll={selectAllCampaigns}
-          onClear={clearCampaigns}
+          selectedIds={localCampaignIds}
+          onToggle={handleToggleCampaign}
           expanded={expanded.campaign}
           onToggleExpand={() => toggleSection('campaign')}
           emptyMessage={EMPTY_MESSAGES.campaign}
@@ -241,10 +169,8 @@ console.log('FilterPanel.emit called with:', {
           items={visibleAdGroups}
           idOf={(ag) => ag.ad_group_id}
           labelOf={(ag) => ag.ad_group_name}
-          selectedIds={selectedAdGroupIds}
-          onToggle={toggleAdGroup}
-          onSelectAll={selectAllAdGroups}
-          onClear={clearAdGroups}
+          selectedIds={localAdGroupIds}
+          onToggle={handleToggleAdGroup}
           expanded={expanded.adGroup}
           onToggleExpand={() => toggleSection('adGroup')}
           emptyMessage={EMPTY_MESSAGES.adGroup}
@@ -257,10 +183,8 @@ console.log('FilterPanel.emit called with:', {
           labelOf={(a) =>
             a.ad_headline?.trim() ? a.ad_headline : `(無題: ${a.ad_id.slice(0, 8)})`
           }
-          selectedIds={selectedAdIds}
-          onToggle={toggleAd}
-          onSelectAll={selectAllAds}
-          onClear={clearAds}
+          selectedIds={localAdIds}
+          onToggle={handleToggleAd}
           expanded={expanded.ad}
           onToggleExpand={() => toggleSection('ad')}
           emptyMessage={EMPTY_MESSAGES.ad}
@@ -271,10 +195,8 @@ console.log('FilterPanel.emit called with:', {
           items={assets}
           idOf={(a) => a.asset_id}
           labelOf={(a) => a.asset_name}
-          selectedIds={selectedAssetIds}
-          onToggle={toggleAsset}
-          onSelectAll={selectAllAssets}
-          onClear={clearAssets}
+          selectedIds={localAssetIds}
+          onToggle={handleToggleAsset}
           expanded={expanded.asset}
           onToggleExpand={() => toggleSection('asset')}
           emptyMessage={EMPTY_MESSAGES.asset}
@@ -284,12 +206,6 @@ console.log('FilterPanel.emit called with:', {
   );
 }
 
-// ---------------------------------------------------------------------------
-// CheckboxSection: a generic, collapsible multi-select panel used by all four
-// filter levels. Kept inside this file because it isn't reused elsewhere; if
-// it ever needs to be shared, lift it into src/components/Ui/.
-// ---------------------------------------------------------------------------
-
 interface CheckboxSectionProps<T> {
   sectionKey: SectionKey;
   title: string;
@@ -298,8 +214,6 @@ interface CheckboxSectionProps<T> {
   labelOf: (item: T) => string;
   selectedIds: string[];
   onToggle: (id: string) => void;
-  onSelectAll: () => void;
-  onClear: () => void;
   expanded: boolean;
   onToggleExpand: () => void;
   emptyMessage: string;
@@ -313,14 +227,10 @@ function CheckboxSection<T>({
   labelOf,
   selectedIds,
   onToggle,
-  onSelectAll,
-  onClear,
   expanded,
   onToggleExpand,
   emptyMessage,
 }: CheckboxSectionProps<T>) {
-  // Selected count limited to currently visible items so the "N/M" badge
-  // never reads "5/3" after a parent filter narrows the list.
   const visibleSelectedCount = useMemo(() => {
     if (selectedIds.length === 0) return 0;
     const visibleIds = new Set(items.map(idOf));
@@ -359,25 +269,6 @@ function CheckboxSection<T>({
           id={`filter-section-${sectionKey}`}
           className="border-t border-gray-200 px-3 py-2"
         >
-          <div className="flex items-center gap-2 mb-2">
-            <button
-              type="button"
-              onClick={onSelectAll}
-              disabled={totalCount === 0}
-              className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              すべて選択
-            </button>
-            <button
-              type="button"
-              onClick={onClear}
-              disabled={visibleSelectedCount === 0}
-              className="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              クリア
-            </button>
-          </div>
-
           {totalCount === 0 ? (
             <p className="text-sm text-gray-500 italic py-2">{emptyMessage}</p>
           ) : (
@@ -387,17 +278,14 @@ function CheckboxSection<T>({
                 const checked = selectedIds.includes(id);
                 return (
                   <li key={id}>
-                    <label
-                      className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 cursor-pointer rounded"
-                    >
+                    <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 cursor-pointer rounded">
                       <input
                         type="checkbox"
                         checked={checked}
-                        onChange={(e) => {
-  console.log('Checkbox changed for id:', id, 'checked:', e.target.checked);
-  onToggle(id);
-}}
-
+                        onChange={() => {
+                          console.log(`Toggling ${id}, currently ${checked}`);
+                          onToggle(id);
+                        }}
                         className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
                       <span className="text-sm text-gray-800 truncate">
