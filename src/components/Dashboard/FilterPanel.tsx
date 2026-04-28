@@ -136,11 +136,19 @@ export default function FilterPanel({
     }
 
     onFilterChange({
-      campaignIds: nextCampaignIds,
-      adGroupIds: prunedAdGroupIds,
-      adIds: prunedAdIds,
-      assetIds: next.assetIds ?? EMPTY_ARRAY,
-    });
+  campaignIds: nextCampaignIds,
+  adGroupIds: prunedAdGroupIds,
+  adIds: prunedAdIds,
+  assetIds: next.assetIds ?? EMPTY_ARRAY,
+});
+
+console.log('FilterPanel.emit called with:', {
+  campaignIds: nextCampaignIds,
+  adGroupIds: prunedAdGroupIds,
+  adIds: prunedAdIds,
+  assetIds: next.assetIds ?? EMPTY_ARRAY,
+});
+
   };
 
   const toggleSection = (key: SectionKey) => {
