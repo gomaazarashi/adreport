@@ -89,8 +89,23 @@ export function useMetricsData(options: UseMetricsDataOptions) {
   // APIからすでにフィルタリングされたデータが来ているので、
   // クライアント側ではfilterMetrics()を呼ばず、aggregateMetricsのみ実行
   const data = useMemo(() => {
-    return aggregateMetrics(rawData, aggregationLevel, preserveDate);
-  }, [rawData, aggregationLevel, preserveDate]);
+  const filtered = filterMetrics(rawData, {
+    campaignIds,
+    adGroupIds,
+    adIds,
+    assetIds,
+  });
+  return aggregateMetrics(filtered, aggregationLevel, preserveDate);
+}, [
+  rawData,
+  aggregationLevel,
+  preserveDate,
+  campaignIds,
+  adGroupIds,
+  adIds,
+  assetIds,
+]);
+
 
   return { data, loading, error, period };
 }
