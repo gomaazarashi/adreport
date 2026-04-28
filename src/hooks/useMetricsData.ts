@@ -1,74 +1,47 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { PerformanceMetrics } from '@/lib/types';
-import {
-  aggregateMetrics,
-  filterMetrics,
-  type AggregationLevel,
-  type MetricsFilters,
-} from '@/lib/metricsAggregation';
+import { filterMetrics, aggregateMetrics, type MetricsFilters } from '@/lib/metricsAggregation';
 
 export type UseMetricsDataOptions = {
   accountId: string;
   startDate?: string;
   endDate?: string;
-  /** Aggregation level for the returned data. Defaults to 'account'. */
-  aggregationLevel?: AggregationLevel;
-  /**
-   * When true (default), each (group, date) pair becomes its own row — useful
-   * for time-series charts. When false, all dates collapse into a single row
-   * per group — useful for KPI summaries over a date range.
-   */
+  aggregationLevel?: 'account' | 'campaign' | 'ad_group' | 'ad' | 'asset';
   preserveDate?: boolean;
-} & MetricsFilters;
-
-export type Period = { start_date: string; end_date: string } | null;
-
-export type UseMetricsDataResult = {
-  data: PerformanceMetrics[];
-  loading: boolean;
-  error: string | null;
-  period: Period;
+  campaignIds?: string[];
+  adGroupIds?: string[];
+  adIds?: string[];
+  assetIds?: string[];
 };
 
-/**
- * Fetch performance metrics for an account, then apply client-side filtering
- * and GROUP BY-style aggregation.
- *
- * The /api/metrics endpoint is called with only account_id + date range; all
- * level- and ID-based filtering happens in JS so we don't depend on backend
- * filter support beyond what already exists.
- */
-export function useMetricsData(
-  options: UseMetricsDataOptions
-): UseMetricsDataResult {
+export function useMetricsData(options: UseMetricsDataOptions) {
   const {
     accountId,
     startDate,
     endDate,
     aggregationLevel = 'account',
-    preserveDate = true,
+    preserveDate = false,
     campaignIds,
     adGroupIds,
     adIds,
     assetIds,
   } = options;
 
-  const [rawData, setRawData] = useState<PerformanceMetrics[]>([]);
+  const [rawData, setRawData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [period, setPeriod] = useState<Period>(null);
+  const [period, setPeriod] = useState<{ start: string; end: string } | null>(null);
 
   useEffect(() => {
     if (!accountId) {
       setRawData([]);
+      setError(null);
       setPeriod(null);
       return;
     }
 
     const abort = new AbortController();
-
     const fetchMetrics = async () => {
       setLoading(true);
       setError(null);
@@ -76,6 +49,10 @@ export function useMetricsData(
         const params = new URLSearchParams({ account_id: accountId });
         if (startDate) params.append('start_date', startDate);
         if (endDate) params.append('end_date', endDate);
+        if (campaignIds?.length) params.append('campaign_ids', campaignIds.join(','));
+        if (adGroupIds?.length) params.append('ad_group_ids', adGroupIds.join(','));
+        if (adIds?.length) params.append('ad_ids', adIds.join(','));
+        if (assetIds?.length) params.append('asset_ids', assetIds.join(','));
 
         const response = await fetch(`/api/metrics?${params.toString()}`, {
           method: 'GET',
@@ -107,10 +84,8 @@ export function useMetricsData(
 
     fetchMetrics();
     return () => abort.abort();
-  }, [accountId, startDate, endDate]);
+  }, [accountId, startDate, endDate, campaignIds, adGroupIds, adIds, assetIds]);
 
-  // Filter + aggregate purely on the client. Memoized so chart/table renders
-  // don't recompute when only unrelated state changes.
   const data = useMemo(() => {
     const filtered = filterMetrics(rawData, {
       campaignIds,
