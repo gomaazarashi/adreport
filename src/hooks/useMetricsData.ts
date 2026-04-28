@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { aggregateMetrics } from '@/lib/metricsAggregation';
+import { filterMetrics, aggregateMetrics } from '@/lib/metricsAggregation';
+
 
 export type UseMetricsDataOptions = {
   accountId: string;
