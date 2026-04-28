@@ -393,7 +393,11 @@ function CheckboxSection<T>({
                       <input
                         type="checkbox"
                         checked={checked}
-                        onChange={() => onToggle(id)}
+                        onChange={(e) => {
+  console.log('Checkbox changed for id:', id, 'checked:', e.target.checked);
+  onToggle(id);
+}}
+
                         className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
                       <span className="text-sm text-gray-800 truncate">
