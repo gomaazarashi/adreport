@@ -36,9 +36,9 @@ export default function Dashboard() {
   campaignIds: selectedFilters.campaignIds,
   adGroupIds: selectedFilters.adGroupIds,
   adIds: selectedFilters.adIds,
-  assetIds: selectedFilters.assetIds,PerformanceChart
-  
-});
+  assetIds: selectedFilters.assetIds,
+  });
+
 
   const {
     campaigns,
