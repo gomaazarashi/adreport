@@ -13,6 +13,8 @@ import DetailTable from './DetailTable';
 import Loading from '@/components/Ui/Loading';
 import ErrorMessage from '@/components/Ui/ErrorMessage';
 import Card from '@/components/Ui/Card';
+import CampaignComparisonChart from '@/components/Dashboard/CampaignComparisonChart';
+
 
 export default function Dashboard() {
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
@@ -31,7 +33,7 @@ export default function Dashboard() {
   campaignIds: selectedFilters.campaignIds,
   adGroupIds: selectedFilters.adGroupIds,
   adIds: selectedFilters.adIds,
-  assetIds: selectedFilters.assetIds,
+  assetIds: selectedFilters.assetIds,PerformanceChart
 });
 
   const {
@@ -176,6 +178,9 @@ export default function Dashboard() {
             {/* グラフ */}
             <div className="mb-8">
               <PerformanceChart data={metricsData} />
+              {/* キャンペーン比較チャート */}
+<CampaignComparisonChart data={metricsData} campaigns={campaigns} />
+
             </div>
 
             {/* 詳細テーブル */}
