@@ -57,7 +57,7 @@ export default function AdComparisonChart({
     const cpa = totalConversions > 0 ? (totalCost / totalConversions).toFixed(0) : 0;
 
     return {
-      name: ad?.ad_type || `Ad-${adId.substring(0, 8)}`,
+      name: ad?.ad_headline || ad?.ad_type || `Ad-${adId.substring(0, 8)}`,
       cost: Math.round(totalCost),
       clicks: totalClicks,
       conversions: totalConversions,
