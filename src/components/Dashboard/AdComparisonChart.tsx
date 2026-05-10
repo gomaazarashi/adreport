@@ -22,7 +22,10 @@ export default function AdComparisonChart({
   data,
   ads,
 }: AdComparisonChartProps) {
+  console.log('AdComparisonChart: data length=', data?.length, 'ads length=', ads?.length);
+  
   if (!data || data.length === 0 || !ads || ads.length === 0) {
+    console.log('AdComparisonChart: returning null - no data');
     return null;
   }
 
@@ -36,7 +39,10 @@ export default function AdComparisonChart({
     }
   });
 
+  console.log('AdComparisonChart: adMap size=', adMap.size);
+
   if (adMap.size === 0) {
+    console.log('AdComparisonChart: no ads in map');
     return null;
   }
 
@@ -59,6 +65,8 @@ export default function AdComparisonChart({
       cpa: parseFloat(String(cpa)),
     };
   });
+
+  console.log('AdComparisonChart: chartData=', chartData);
 
   return (
     <Card>
