@@ -205,7 +205,7 @@ export default function Dashboard() {
               {/* 広告比較チャート */}
               <AdComparisonChart data={adMetricsData} ads={ads} />
               {/* エセット比較チャート */}
-              <AssetComparisonChart data={assetMetricsData} assets={assets} />
+              <AssetComparisonChart data={metricsData} assets={assets} />
             </div>
 
             {/* 詳細テーブル */}
