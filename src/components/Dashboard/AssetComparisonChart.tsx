@@ -36,6 +36,10 @@ export default function AssetComparisonChart({
     }
   });
 
+  if (assetMap.size === 0) {
+    return null;
+  }
+
   const chartData = Array.from(assetMap.entries()).map(([assetId, metrics]) => {
     const asset = assets.find((a) => a.asset_id === assetId);
     const totalImpressions = metrics.reduce((sum, m) => sum + m.impressions, 0);
@@ -47,7 +51,7 @@ export default function AssetComparisonChart({
     const cpa = totalConversions > 0 ? (totalCost / totalConversions).toFixed(0) : 0;
 
     return {
-      name: asset?.asset_name || 'Unknown',
+      name: asset?.asset_name || `Asset-${assetId.substring(0, 8)}`,
       cost: Math.round(totalCost),
       clicks: totalClicks,
       conversions: totalConversions,
@@ -59,11 +63,11 @@ export default function AssetComparisonChart({
   return (
     <Card>
       <h2 className="text-lg font-bold text-gray-900 mb-6">アセット別比較</h2>
-      <div className="w-full h-80">
+      <div style={{ width: '100%', height: 320 }}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData}>
+          <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 60 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="name" stroke="#999" style={{ fontSize: '12px' }} />
+            <XAxis dataKey="name" stroke="#999" style={{ fontSize: '12px' }} angle={-45} textAnchor="end" height={80} />
             <YAxis stroke="#999" style={{ fontSize: '12px' }} yAxisId="left" />
             <YAxis stroke="#999" style={{ fontSize: '12px' }} yAxisId="right" orientation="right" />
             <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '4px' }} formatter={(value) => typeof value === 'number' ? value.toFixed(2) : String(value)} />
