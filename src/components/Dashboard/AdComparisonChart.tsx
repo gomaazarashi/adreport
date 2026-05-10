@@ -1,59 +1,47 @@
 'use client';
 
-import { PerformanceMetrics, Ad } from '@/lib/types';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { PerformanceMetrics, Campaign } from '@/lib/types';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Card from '@/components/Ui/Card';
 
 interface AdComparisonChartProps {
   data: PerformanceMetrics[];
-  ads: Ad[];
+  ads: Campaign[];
 }
 
-export default function AdComparisonChart({
-  data,
-  ads,
-}: AdComparisonChartProps) {
-  console.log('AdComparisonChart: data length=', data?.length, 'ads length=', ads?.length);
-  
-  if (!data || data.length === 0 || !ads || ads.length === 0) {
+export default function AdComparisonChart({ data, ads }: AdComparisonChartProps) {
+  if (!data || data.length === 0) {
     console.log('AdComparisonChart: returning null - no data');
     return null;
   }
 
+  // Group by ad_id
   const adMap = new Map<string, PerformanceMetrics[]>();
-  data.forEach((m) => {
-    if (m.ad_id) {
-      if (!adMap.has(m.ad_id)) {
-        adMap.set(m.ad_id, []);
+  data.forEach((metric) => {
+    const adId = metric.ad_id as string;
+    if (adId) {
+      if (!adMap.has(adId)) {
+        adMap.set(adId, []);
       }
-      adMap.get(m.ad_id)!.push(m);
+      adMap.get(adId)!.push(metric);
     }
   });
 
-  console.log('AdComparisonChart: adMap size=', adMap.size);
+  console.log('AdComparisonChart: data length=', data.length, 'ads length=', ads.length, 'adMap size=', adMap.size);
 
   if (adMap.size === 0) {
     console.log('AdComparisonChart: no ads in map');
     return null;
   }
 
+  // Build chart data
   const chartData = Array.from(adMap.entries()).map(([adId, metrics]) => {
-    const ad = ads.find((a) => a.ad_id === adId);
-    const totalImpressions = metrics.reduce((sum, m) => sum + m.impressions, 0);
-    const totalClicks = metrics.reduce((sum, m) => sum + m.clicks, 0);
-    const totalCost = metrics.reduce((sum, m) => sum + m.cost, 0);
-    const totalConversions = metrics.reduce((sum, m) => sum + m.conversions, 0);
+    const ad = ads.find((a) => a.id === adId);
+    const totalCost = metrics.reduce((sum, m) => sum + (m.cost || 0), 0);
+    const totalClicks = metrics.reduce((sum, m) => sum + (m.clicks || 0), 0);
+    const totalConversions = metrics.reduce((sum, m) => sum + (m.conversions || 0), 0);
 
-    const ctr = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : 0;
+    const ctr = totalClicks > 0 ? ((totalClicks / metrics.reduce((sum, m) => sum + (m.impressions || 0), 0)) * 100).toFixed(2) : 0;
     const cpa = totalConversions > 0 ? (totalCost / totalConversions).toFixed(0) : 0;
 
     return {
@@ -71,14 +59,17 @@ export default function AdComparisonChart({
   return (
     <Card>
       <h2 className="text-lg font-bold text-gray-900 mb-6">広告別比較</h2>
-      <div style={{ width: '100%', height: 320 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 60 }}>
+      <div style={{ width: '100%', height: 'auto', minHeight: Math.max(chartData.length * 60, 300) }}>
+        <ResponsiveContainer width="100%" height={Math.max(chartData.length * 60, 300)}>
+          <BarChart data={chartData} layout="vertical" margin={{ top: 20, right: 30, left: 250, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="name" stroke="#999" style={{ fontSize: '12px' }} angle={-45} textAnchor="end" height={80} />
-            <YAxis stroke="#999" style={{ fontSize: '12px' }} yAxisId="left" />
-            <YAxis stroke="#999" style={{ fontSize: '12px' }} yAxisId="right" orientation="right" />
-            <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '4px' }} formatter={(value) => typeof value === 'number' ? value.toFixed(2) : String(value)} />
+            <XAxis type="number" stroke="#999" style={{ fontSize: '12px' }} yAxisId="left" />
+            <YAxis dataKey="name" type="category" stroke="#999" style={{ fontSize: '12px' }} width={240} />
+            <YAxis type="category" stroke="#999" style={{ fontSize: '12px' }} yAxisId="right" orientation="right" />
+            <Tooltip 
+              formatter={(value) => (typeof value === 'number' ? value.toLocaleString() : value)}
+              contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc' }}
+            />
             <Legend />
             <Bar yAxisId="left" dataKey="cost" fill="#3b82f6" name="費用（円）" />
             <Bar yAxisId="left" dataKey="clicks" fill="#10b981" name="クリック数" />

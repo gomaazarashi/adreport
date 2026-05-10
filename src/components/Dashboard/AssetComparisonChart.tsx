@@ -1,53 +1,47 @@
 'use client';
 
-import { PerformanceMetrics, Asset } from '@/lib/types';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { PerformanceMetrics, Campaign } from '@/lib/types';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Card from '@/components/Ui/Card';
 
 interface AssetComparisonChartProps {
   data: PerformanceMetrics[];
-  assets: Asset[];
+  assets: Campaign[];
 }
 
-export default function AssetComparisonChart({
-  data,
-  assets,
-}: AssetComparisonChartProps) {
-  if (!data || data.length === 0 || !assets || assets.length === 0) {
+export default function AssetComparisonChart({ data, assets }: AssetComparisonChartProps) {
+  if (!data || data.length === 0) {
+    console.log('AssetComparisonChart: returning null - no data');
     return null;
   }
 
+  // Group by asset_id
   const assetMap = new Map<string, PerformanceMetrics[]>();
-  data.forEach((m) => {
-    if (m.asset_id) {
-      if (!assetMap.has(m.asset_id)) {
-        assetMap.set(m.asset_id, []);
+  data.forEach((metric) => {
+    const assetId = metric.asset_id as string;
+    if (assetId) {
+      if (!assetMap.has(assetId)) {
+        assetMap.set(assetId, []);
       }
-      assetMap.get(m.asset_id)!.push(m);
+      assetMap.get(assetId)!.push(metric);
     }
   });
 
+  console.log('AssetComparisonChart: data length=', data.length, 'assets length=', assets.length, 'assetMap size=', assetMap.size);
+
   if (assetMap.size === 0) {
+    console.log('AssetComparisonChart: no assets in map');
     return null;
   }
 
+  // Build chart data
   const chartData = Array.from(assetMap.entries()).map(([assetId, metrics]) => {
-    const asset = assets.find((a) => a.asset_id === assetId);
-    const totalImpressions = metrics.reduce((sum, m) => sum + m.impressions, 0);
-    const totalClicks = metrics.reduce((sum, m) => sum + m.clicks, 0);
-    const totalCost = metrics.reduce((sum, m) => sum + m.cost, 0);
-    const totalConversions = metrics.reduce((sum, m) => sum + m.conversions, 0);
+    const asset = assets.find((a) => a.id === assetId);
+    const totalCost = metrics.reduce((sum, m) => sum + (m.cost || 0), 0);
+    const totalClicks = metrics.reduce((sum, m) => sum + (m.clicks || 0), 0);
+    const totalConversions = metrics.reduce((sum, m) => sum + (m.conversions || 0), 0);
 
-    const ctr = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : 0;
+    const ctr = totalClicks > 0 ? ((totalClicks / metrics.reduce((sum, m) => sum + (m.impressions || 0), 0)) * 100).toFixed(2) : 0;
     const cpa = totalConversions > 0 ? (totalCost / totalConversions).toFixed(0) : 0;
 
     return {
@@ -60,17 +54,22 @@ export default function AssetComparisonChart({
     };
   });
 
+  console.log('AssetComparisonChart: chartData=', chartData);
+
   return (
     <Card>
       <h2 className="text-lg font-bold text-gray-900 mb-6">アセット別比較</h2>
-      <div style={{ width: '100%', height: 320 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 60 }}>
+      <div style={{ width: '100%', height: 'auto', minHeight: Math.max(chartData.length * 60, 300) }}>
+        <ResponsiveContainer width="100%" height={Math.max(chartData.length * 60, 300)}>
+          <BarChart data={chartData} layout="vertical" margin={{ top: 20, right: 30, left: 200, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="name" stroke="#999" style={{ fontSize: '12px' }} angle={-45} textAnchor="end" height={80} />
-            <YAxis stroke="#999" style={{ fontSize: '12px' }} yAxisId="left" />
-            <YAxis stroke="#999" style={{ fontSize: '12px' }} yAxisId="right" orientation="right" />
-            <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '4px' }} formatter={(value) => typeof value === 'number' ? value.toFixed(2) : String(value)} />
+            <XAxis type="number" stroke="#999" style={{ fontSize: '12px' }} yAxisId="left" />
+            <YAxis dataKey="name" type="category" stroke="#999" style={{ fontSize: '12px' }} width={190} />
+            <YAxis type="category" stroke="#999" style={{ fontSize: '12px' }} yAxisId="right" orientation="right" />
+            <Tooltip 
+              formatter={(value) => (typeof value === 'number' ? value.toLocaleString() : value)}
+              contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc' }}
+            />
             <Legend />
             <Bar yAxisId="left" dataKey="cost" fill="#3b82f6" name="費用（円）" />
             <Bar yAxisId="left" dataKey="clicks" fill="#10b981" name="クリック数" />
