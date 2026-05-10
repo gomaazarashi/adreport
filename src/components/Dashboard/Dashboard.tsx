@@ -39,6 +39,24 @@ export default function Dashboard() {
   assetIds: selectedFilters.assetIds,
   });
 
+  // 広告レベルのデータ
+  const { data: adMetricsData } = useMetricsData({
+    accountId: selectedAccountId,
+    startDate,
+    endDate,
+    aggregationLevel: 'ad',
+    adIds: selectedFilters.adIds,
+  });
+
+  // アセットレベルのデータ
+  const { data: assetMetricsData } = useMetricsData({
+    accountId: selectedAccountId,
+    startDate,
+    endDate,
+    aggregationLevel: 'asset',
+    assetIds: selectedFilters.assetIds,
+  });
+
 
   const {
     campaigns,

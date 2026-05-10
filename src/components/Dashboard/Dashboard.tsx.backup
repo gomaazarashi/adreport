@@ -1,0 +1,66 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useAccounts } from '@/hooks/useAccounts';
+import { useMetricsData } from '@/hooks/useMetricsData';
+import { useMasterData } from '@/hooks/useMasterData';
+import AccountSelector from './AccountSelector';
+import DateRangePicker from './DateRangePicker';
+import FilterPanel, { type FilterValues } from './FilterPanel';
+import MetricsCards from './MetricsCards';
+import PerformanceChart from './PerformanceChart';
+import DetailTable from './DetailTable';
+import Loading from '@/components/Ui/Loading';
+import ErrorMessage from '@/components/Ui/ErrorMessage';
+import Card from '@/components/Ui/Card';
+import CampaignComparisonChart from '@/components/Dashboard/CampaignComparisonChart';
+import AdComparisonChart from '@/components/Dashboard/AdComparisonChart';
+import AssetComparisonChart from '@/components/Dashboard/AssetComparisonChart';
+
+export default function Dashboard() {
+  const [selectedAccountId, setSelectedAccountId] = useState<string>('');
+  const [selectedFilters, setSelectedFilters] = useState<FilterValues>({});
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
+
+  const { accounts, loading: accountsLoading, error: accountsError } = useAccounts();
+  
+  const { data: metricsData, loading: metricsLoading, error: metricsError } = useMetricsData({
+    accountId: selectedAccountId,
+    startDate,
+    endDate,
+    aggregationLevel: 'campaign',
+    preserveDate: true,
+    campaignIds: selectedFilters.campaignIds,
+    adGroupIds: selectedFilters.adGroupIds,
+    adIds: selectedFilters.adIds,
+    assetIds: selectedFilters.assetIds,
+  });
+
+  // 広告レベルのデータ
+  const { data: adMetricsData } = useMetricsData({
+    accountId: selectedAccountId,
+    startDate,
+    endDate,
+    aggregationLevel: 'ad',
+    adIds: selectedFilters.adIds,
+  });
+
+  // アセットレベルのデータ
+  const { data: assetMetricsData } = useMetricsData({
+    accountId: selectedAccountId,
+    startDate,
+    endDate,
+    aggregationLevel: 'asset',
+    assetIds: selectedFilters.assetIds,
+  });
+
+  const {
+    campaigns,
+    adGroups,
+    ads,
+    assets,
+    loading: masterDataLoading,
+    error: masterDataError,
+  } = useMasterData(selectedAccountId);
