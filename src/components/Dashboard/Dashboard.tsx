@@ -23,14 +23,17 @@ export default function Dashboard() {
 
   const { accounts, loading: accountsLoading, error: accountsError } = useAccounts();
   const { data: metricsData, loading: metricsLoading, error: metricsError } = useMetricsData({
-    accountId: selectedAccountId,
-    startDate,
-    endDate,
-    campaignIds: selectedFilters.campaignIds,
-    adGroupIds: selectedFilters.adGroupIds,
-    adIds: selectedFilters.adIds,
-    assetIds: selectedFilters.assetIds,
-  });
+  accountId: selectedAccountId,
+  startDate,
+  endDate,
+  aggregationLevel: 'campaign',
+  preserveDate: true,
+  campaignIds: selectedFilters.campaignIds,
+  adGroupIds: selectedFilters.adGroupIds,
+  adIds: selectedFilters.adIds,
+  assetIds: selectedFilters.assetIds,
+});
+
   const {
     campaigns,
     adGroups,
