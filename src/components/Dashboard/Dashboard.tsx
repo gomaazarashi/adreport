@@ -14,6 +14,9 @@ import Loading from '@/components/Ui/Loading';
 import ErrorMessage from '@/components/Ui/ErrorMessage';
 import Card from '@/components/Ui/Card';
 import CampaignComparisonChart from '@/components/Dashboard/CampaignComparisonChart';
+import AdComparisonChart from '@/components/Dashboard/AdComparisonChart';
+import AssetComparisonChart from '@/components/Dashboard/AssetComparisonChart';
+
 
 
 export default function Dashboard() {
@@ -34,6 +37,7 @@ export default function Dashboard() {
   adGroupIds: selectedFilters.adGroupIds,
   adIds: selectedFilters.adIds,
   assetIds: selectedFilters.assetIds,PerformanceChart
+  
 });
 
   const {
@@ -180,7 +184,10 @@ export default function Dashboard() {
               <PerformanceChart data={metricsData} />
               {/* キャンペーン比較チャート */}
 <CampaignComparisonChart data={metricsData} campaigns={campaigns} />
-
+              {/* 広告比較チャート */}
+              <AdComparisonChart data={metricsData} ads={ads} />
+              {/* エセット比較チャート */}
+              <AssetComparisonChart data={metricsData} assets={assets} />
             </div>
 
             {/* 詳細テーブル */}
