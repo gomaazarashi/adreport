@@ -36,7 +36,7 @@ export default function AssetComparisonChart({ data, assets }: AssetComparisonCh
 
   // Build chart data
   const chartData = Array.from(assetMap.entries()).map(([assetId, metrics]) => {
-    const asset = assets.find((a) => a.id === assetId);
+    const asset = assets.find((a) => a.asset_id === assetId);
     const totalCost = metrics.reduce((sum, m) => sum + (m.cost || 0), 0);
     const totalClicks = metrics.reduce((sum, m) => sum + (m.clicks || 0), 0);
     const totalConversions = metrics.reduce((sum, m) => sum + (m.conversions || 0), 0);

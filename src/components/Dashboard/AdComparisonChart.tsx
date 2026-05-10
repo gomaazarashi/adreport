@@ -36,7 +36,7 @@ export default function AdComparisonChart({ data, ads }: AdComparisonChartProps)
 
   // Build chart data
   const chartData = Array.from(adMap.entries()).map(([adId, metrics]) => {
-    const ad = ads.find((a) => a.id === adId);
+    const ad = ads.find((a) => a.ad_id === adId);
     const totalCost = metrics.reduce((sum, m) => sum + (m.cost || 0), 0);
     const totalClicks = metrics.reduce((sum, m) => sum + (m.clicks || 0), 0);
     const totalConversions = metrics.reduce((sum, m) => sum + (m.conversions || 0), 0);
